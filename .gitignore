@@ -1,0 +1,22 @@
+# Entorno virtual
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Outputs generados (opcional: comenta estas líneas si quieres subirlos)
+outputs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Sistema
+.DS_Store
+*.log
