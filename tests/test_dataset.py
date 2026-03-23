@@ -26,7 +26,6 @@ def main():
     check("Archivo sdss_sample.csv existe", True)
     df = pd.read_csv(DATASET_PATH)
 
-    # Normalizar clases para la validación
     df["class"] = df["class"].str.upper().str.strip()
 
     faltantes = set(COLUMNAS_REQUERIDAS) - set(df.columns)

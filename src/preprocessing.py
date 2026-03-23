@@ -9,14 +9,12 @@ TARGET_CLS    = "class"
 TARGET_REG    = "redshift"
 
 def cargar_datos(ruta: str) -> pd.DataFrame:
-    # Buscar el CSV relativo al directorio del proyecto (un nivel arriba de src/)
     if not os.path.isfile(ruta):
         ruta_alternativa = os.path.join(os.path.dirname(__file__), "..", ruta)
         ruta = os.path.normpath(ruta_alternativa)
 
     df = pd.read_csv(ruta)
 
-    # Normalizar clases a mayúsculas: Galaxy -> GALAXY, Star -> STAR, etc.
     df[TARGET_CLS] = df[TARGET_CLS].str.upper().str.strip()
 
     columnas_requeridas = set(FEATURES_FOTO + [TARGET_CLS, TARGET_REG])
@@ -30,7 +28,7 @@ def cargar_datos(ruta: str) -> pd.DataFrame:
     return df
 
 def preprocesar(df: pd.DataFrame):
-    # Crear outputs/ relativo al directorio de trabajo actual
+    
     os.makedirs("outputs", exist_ok=True)
 
     scaler = StandardScaler()
