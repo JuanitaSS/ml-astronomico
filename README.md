@@ -1,5 +1,8 @@
 # 🔭 Pipeline ML Astronómico SDSS
 **Institución Universitaria de Envigado — Big Data**
+## INTEGRANTES:
+* Cristian David Ocampo Uribe
+* Juanita Solórzano Salazar
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)
