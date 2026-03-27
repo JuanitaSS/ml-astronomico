@@ -3,9 +3,10 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, confusion_matrix
 
 def ejecutar_regresion(X, y):
     X_train, X_test, y_train, y_test = train_test_split(
@@ -49,13 +50,34 @@ def ejecutar_regresion(X, y):
     plt.savefig("outputs/regresion_coeficientes.png", dpi=150)
     plt.close()
 
+    # Construir una matriz de confusión a partir de redshift discretizado en bins
+    n_bins = 5
+    edges = np.linspace(min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max()), n_bins + 1)
+    y_test_cat = np.clip(np.digitize(y_test, edges[1:-1]), 0, n_bins - 1)
+    y_pred_cat = np.clip(np.digitize(y_pred, edges[1:-1]), 0, n_bins - 1)
+
+    cm = confusion_matrix(y_test_cat, y_pred_cat)
+
+    fig4, ax4 = plt.subplots(figsize=(7, 5))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax4,
+                xticklabels=[f"bin_{i+1}" for i in range(n_bins)],
+                yticklabels=[f"bin_{i+1}" for i in range(n_bins)])
+    ax4.set_title("Matriz de Confusión (Redshift en bins)", fontsize=13, fontweight="bold")
+    ax4.set_xlabel("Predicho"); ax4.set_ylabel("Real")
+    plt.tight_layout()
+    plt.savefig("outputs/regresion_confusion_matrix.png", dpi=150)
+    plt.close()
+
     metricas = {
         "modelo": "Regresión Lineal", "split": "70/30",
         "MSE": round(float(mse), 8), "RMSE": round(float(rmse), 8),
         "R2": round(float(r2), 6),
         "coeficientes": {f: round(float(c), 6) for f, c in zip(features, coefs)},
+        "confusion_matrix_bins": cm.tolist(),
+        "bins": [float(x) for x in edges.tolist()]
     }
     with open("outputs/metricas_regresion.json", "w", encoding="utf-8") as f:
         json.dump(metricas, f, indent=2, ensure_ascii=False)
     print("      Guardado: outputs/metricas_regresion.json")
+    print("      Guardado: outputs/regresion_confusion_matrix.png")
     return metricas
