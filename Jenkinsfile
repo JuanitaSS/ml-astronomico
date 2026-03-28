@@ -5,7 +5,9 @@ pipeline {
         IMAGE_NAME  = "ml-astronomico"
         IMAGE_TAG   = "${BUILD_NUMBER}"
         OUTPUTS_DIR = "outputs"
-        PYTHON      = "python3"
+        VENV        = "venv"
+        PYTHON      = "${VENV}/bin/python"
+        PIP         = "${VENV}/bin/pip"
     }
 
     options {
@@ -15,6 +17,7 @@ pipeline {
     }
 
     stages {
+
         stage("1 · Checkout") {
             steps {
                 echo "Clonando repositorio..."
@@ -27,9 +30,8 @@ pipeline {
             steps {
                 sh '''
                 python3 -m venv venv
-                . venv/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                venv/bin/python -m pip install --upgrade pip
+                venv/bin/pip install -r requirements.txt
                 '''
             }
         }
@@ -37,8 +39,8 @@ pipeline {
         stage("3 · Validar dataset") {
             steps {
                 sh """
-                    mkdir -p ${OUTPUTS_DIR}
-                    ${PYTHON} tests/test_dataset.py
+                mkdir -p ${OUTPUTS_DIR}
+                ${PYTHON} tests/test_dataset.py
                 """
             }
             post {
@@ -51,18 +53,17 @@ pipeline {
 
         stage("4 · Ejecutar pipeline ML") {
             steps {
-                sh '''
-                . venv/bin/activate
-                python3 src/main.py
-                '''
+                sh """
+                ${PYTHON} src/main.py
+                """
             }
         }
 
         stage("5 · Build Docker") {
             steps {
                 sh """
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
                 """
             }
         }
@@ -70,16 +71,16 @@ pipeline {
         stage("6 · Ejecutar en Docker") {
             steps {
                 sh """
-                    docker run --rm \
-                        -v \$(pwd)/${OUTPUTS_DIR}:/app/outputs \
-                        ${IMAGE_NAME}:latest
+                docker run --rm \
+                    -v \$(pwd)/${OUTPUTS_DIR}:/app/outputs \
+                    ${IMAGE_NAME}:latest
                 """
             }
         }
 
         stage("7 · Archivar artefactos") {
             steps {
-                sh "ls -lh ${OUTPUTS_DIR}/"
+                sh "ls -lh ${OUTPUTS_DIR}/ || true"
             }
             post {
                 always {
