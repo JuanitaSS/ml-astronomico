@@ -25,10 +25,12 @@ pipeline {
 
         stage("2 · Instalar dependencias") {
             steps {
-                sh """
-                    ${PYTHON} -m pip install --upgrade pip --quiet
-                    ${PYTHON} -m pip install -r requirements.txt --quiet
-                """
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
             }
         }
 
@@ -49,7 +51,10 @@ pipeline {
 
         stage("4 · Ejecutar pipeline ML") {
             steps {
-                sh "cd src && ${PYTHON} main.py"
+                sh '''
+                . venv/bin/activate
+                python3 src/main.py
+                '''
             }
         }
 
